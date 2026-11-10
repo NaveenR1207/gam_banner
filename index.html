@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Foundayo 640x480</title>
+
+  <!-- Correct meta tags for Google Ads -->
+  <meta name="ad.size" content="width=640,height=480">
+  <meta name="ad.orientation" content="landscape,portrait">
+
+  <script type="text/javascript">
+    var clickTag = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
+    var clickTag1 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
+  </script>
+
+  <style>
+    /* === Base container === */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 640px;
+      height: 480px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    section {
+      position: relative;
+      width: 640px;
+      height: 480px;
+      overflow: hidden;
+    }
+
+    /* === Slides === */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 640px;
+      height: 480px;
+      opacity: 0;
+      pointer-events: none;
+      animation: crossfade 18s infinite;
+    }
+
+    .slide img {
+      width: 640px;
+      height: 480px;
+      display: block;
+      border: 0;
+    }
+
+    .hotspot {
+      position: absolute;
+      display: block;
+      cursor: pointer;
+      border: none;
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <section>
+    <!-- Slide 1 -->
+    <div class="">
+      <img src="1.png" alt="">
+      <a href="javascript:void(window.open(clickTag1))"
+         class="hotspot"
+         style="left: 94px; top: 241px; width: 452px; height: 52px;"></a>
+      <a href="javascript:void(window.open(clickTag))"
+         class="hotspot"
+         style="left: 564px; top: 84px; width: 57px; height: 18px;"></a>
+    </div>
+
+  
+</section>
+</body>
+</html>
