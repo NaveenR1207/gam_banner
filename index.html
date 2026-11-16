@@ -9,7 +9,6 @@
   <meta name="ad.orientation" content="landscape,portrait">
 
   <style>
-    /* === Base container === */
     html, body {
       margin: 0;
       padding: 0;
@@ -31,6 +30,8 @@
       height: 480px;
       display: block;
       border: 0;
+      pointer-events: none;
+      user-select: none;
     }
 
     .hotspot {
@@ -38,52 +39,57 @@
       display: block;
       cursor: pointer;
       border: none;
-      z-index: 10;
+      z-index: 99;
+      background: rgba(0, 0, 0, 0);
+      pointer-events: auto;
+      text-decoration: none;
     }
   </style>
 
   <script>
-    // Default fallback destinations (used ONLY if opened directly outside GAM)
-    var defaultDest1 = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
-    var defaultDest2 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
+    // Fallback URLs matching your GAM variables (used only if opened outside GAM)
+    var defaultClickTag1 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
+    var defaultClickTag2 = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
 
-    var trackedClick1 = "";
-    var trackedClick2 = "";
+    var tracked1 = "";
+    var tracked2 = "";
 
     // 1. Read clean GAM tracking URLs passed via iframe.name
     try {
       if (window.name) {
         var parsed = JSON.parse(window.name);
-        if (parsed.clickTag1) trackedClick1 = parsed.clickTag1;
-        if (parsed.clickTag2) trackedClick2 = parsed.clickTag2;
+        if (parsed.clickTag1) tracked1 = parsed.clickTag1;
+        else if (parsed.clickTag) tracked1 = parsed.clickTag;
+        if (parsed.clickTag2) tracked2 = parsed.clickTag2;
       }
     } catch (e) {}
 
     // 2. Fallback: Read from URL query parameters (?clickTag1=...&clickTag2=...)
-    if (!trackedClick1 || !trackedClick2) {
+    if (!tracked1 || !tracked2) {
       try {
         var params = new URLSearchParams(window.location.search);
-        if (!trackedClick1) trackedClick1 = params.get("clickTag1") || params.get("clickTag") || "";
-        if (!trackedClick2) trackedClick2 = params.get("clickTag2") || "";
+        if (!tracked1) tracked1 = params.get("clickTag1") || params.get("clickTag") || "";
+        if (!tracked2) tracked2 = params.get("clickTag2") || "";
       } catch (e) {}
     }
 
-    // Final resolved URLs (GAM tracked URL takes priority over direct fallback)
-    var finalUrl1 = trackedClick1 || defaultDest1;
-    var finalUrl2 = trackedClick2 || defaultDest2;
+    var finalClickTag1 = tracked1 || defaultClickTag1;
+    var finalClickTag2 = tracked2 || defaultClickTag2;
 
-    // Click handler for Destination 1 (CloudFront PDF - top-right hotspot)
-    function openClick1(e) {
+    // Handler for ClickTag1 (Main Button -> Lilly Representative Request)
+    function handleClickTag1(e) {
       if (e) e.preventDefault();
       try { window.parent.postMessage({ type: "gam_click", slot: 1 }, "*"); } catch (err) {}
-      window.open(finalUrl1, "_blank", "noopener,noreferrer");
+      window.open(finalClickTag1, "_blank", "noopener,noreferrer");
+      return false;
     }
 
-    // Click handler for Destination 2 (Lilly Representative Request - main CTA hotspot)
-    function openClick2(e) {
+    // Handler for ClickTag2 (Top-Right Hotspot -> CloudFront PDF)
+    function handleClickTag2(e) {
       if (e) e.preventDefault();
       try { window.parent.postMessage({ type: "gam_click", slot: 2 }, "*"); } catch (err) {}
-      window.open(finalUrl2, "_blank", "noopener,noreferrer");
+      window.open(finalClickTag2, "_blank", "noopener,noreferrer");
+      return false;
     }
   </script>
 </head>
@@ -92,10 +98,21 @@
   <section>
     <div>
       <img src="1.png" alt="">
-      <!-- Main CTA Button -> Destination 2 (Lilly Representative Request) -->
+
+      <!-- ClickTag1: Main CTA Button (Lilly Representative Request) -->
       <a href="javascript:void(0)"
-         onclick="openClick2(event)"
+         onclick="return handleClickTag1(event);"
          class="hotspot"
+         aria-label="Contact Lilly Representative"
          style="left: 94px; top: 241px; width: 452px; height: 52px;"></a>
 
-      <!-- Top-Right
+      <!-- ClickTag2: Top-Right Link (PDF Document) -->
+      <a href="javascript:void(0)"
+         onclick="return handleClickTag2(event);"
+         class="hotspot"
+         aria-label="View Document"
+         style="left: 564px; top: 84px; width: 57px; height: 18px;"></a>
+    </div>
+  </section>
+</body>
+</html>
