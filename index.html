@@ -8,11 +8,6 @@
   <meta name="ad.size" content="width=640,height=480">
   <meta name="ad.orientation" content="landscape,portrait">
 
-  <script type="text/javascript">
-    var clickTag = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
-    var clickTag1 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
-  </script>
-
   <style>
     /* === Base container === */
     html, body {
@@ -31,19 +26,7 @@
       overflow: hidden;
     }
 
-    /* === Slides === */
-    .slide {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 640px;
-      height: 480px;
-      opacity: 0;
-      pointer-events: none;
-      animation: crossfade 18s infinite;
-    }
-
-    .slide img {
+    section img {
       width: 640px;
       height: 480px;
       display: block;
@@ -55,26 +38,64 @@
       display: block;
       cursor: pointer;
       border: none;
+      z-index: 10;
+    }
+  </style>
+
+  <script>
+    // Default fallback destinations (used ONLY if opened directly outside GAM)
+    var defaultDest1 = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
+    var defaultDest2 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
+
+    var trackedClick1 = "";
+    var trackedClick2 = "";
+
+    // 1. Read clean GAM tracking URLs passed via iframe.name
+    try {
+      if (window.name) {
+        var parsed = JSON.parse(window.name);
+        if (parsed.clickTag1) trackedClick1 = parsed.clickTag1;
+        if (parsed.clickTag2) trackedClick2 = parsed.clickTag2;
+      }
+    } catch (e) {}
+
+    // 2. Fallback: Read from URL query parameters (?clickTag1=...&clickTag2=...)
+    if (!trackedClick1 || !trackedClick2) {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        if (!trackedClick1) trackedClick1 = params.get("clickTag1") || params.get("clickTag") || "";
+        if (!trackedClick2) trackedClick2 = params.get("clickTag2") || "";
+      } catch (e) {}
     }
 
+    // Final resolved URLs (GAM tracked URL takes priority over direct fallback)
+    var finalUrl1 = trackedClick1 || defaultDest1;
+    var finalUrl2 = trackedClick2 || defaultDest2;
 
-  </style>
+    // Click handler for Destination 1 (CloudFront PDF - top-right hotspot)
+    function openClick1(e) {
+      if (e) e.preventDefault();
+      try { window.parent.postMessage({ type: "gam_click", slot: 1 }, "*"); } catch (err) {}
+      window.open(finalUrl1, "_blank", "noopener,noreferrer");
+    }
+
+    // Click handler for Destination 2 (Lilly Representative Request - main CTA hotspot)
+    function openClick2(e) {
+      if (e) e.preventDefault();
+      try { window.parent.postMessage({ type: "gam_click", slot: 2 }, "*"); } catch (err) {}
+      window.open(finalUrl2, "_blank", "noopener,noreferrer");
+    }
+  </script>
 </head>
 
 <body>
   <section>
-    <!-- Slide 1 -->
-    <div class="">
+    <div>
       <img src="1.png" alt="">
-      <a href="javascript:void(window.open(clickTag1))"
+      <!-- Main CTA Button -> Destination 2 (Lilly Representative Request) -->
+      <a href="javascript:void(0)"
+         onclick="openClick2(event)"
          class="hotspot"
          style="left: 94px; top: 241px; width: 452px; height: 52px;"></a>
-      <a href="javascript:void(window.open(clickTag))"
-         class="hotspot"
-         style="left: 564px; top: 84px; width: 57px; height: 18px;"></a>
-    </div>
 
-  
-</section>
-</body>
-</html>
+      <!-- Top-Right
