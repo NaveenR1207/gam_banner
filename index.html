@@ -8,7 +8,43 @@
   <meta name="ad.size" content="width=640,height=480">
   <meta name="ad.orientation" content="landscape,portrait">
 
+  <script type="text/javascript">
+    // Original default URLs (kept intact as fallback)
+    var clickTag  = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
+    var clickTag1 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
+
+    // Override with GAM tracked URLs (%%CLICK_URL_UNESC%% + destination) when served via GAM
+    (function () {
+      var gam1 = "";
+      var gam2 = "";
+
+      try {
+        if (window.name) {
+          var parsed = JSON.parse(window.name);
+          if (parsed.clickTag1) gam1 = parsed.clickTag1;
+          else if (parsed.clickTag) gam1 = parsed.clickTag;
+          if (parsed.clickTag2) gam2 = parsed.clickTag2;
+        }
+      } catch (e) {}
+
+      if (!gam1 || !gam2) {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          if (!gam1) gam1 = params.get("clickTag1") || params.get("clickTag") || "";
+          if (!gam2) gam2 = params.get("clickTag2") || "";
+        } catch (e) {}
+      }
+
+      // Match your GAM Creative fields:
+      // ClickTag1 in GAM = lilly-representative-request -> maps to clickTag1 (Main Button)
+      // ClickTag2 in GAM = cloudfront PDF -> maps to clickTag ("click here" link)
+      if (gam1) clickTag1 = gam1;
+      if (gam2) clickTag  = gam2;
+    })();
+  </script>
+
   <style>
+    /* === Base container === */
     html, body {
       margin: 0;
       padding: 0;
@@ -25,13 +61,23 @@
       overflow: hidden;
     }
 
-    section img {
+    /* === Slides === */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 640px;
+      height: 480px;
+      opacity: 0;
+      pointer-events: none;
+      animation: crossfade 18s infinite;
+    }
+
+    .slide img {
       width: 640px;
       height: 480px;
       display: block;
       border: 0;
-      pointer-events: none;
-      user-select: none;
     }
 
     .hotspot {
@@ -39,78 +85,23 @@
       display: block;
       cursor: pointer;
       border: none;
-      z-index: 99;
-      background: rgba(0, 0, 0, 0);
-      pointer-events: auto;
-      text-decoration: none;
+      z-index: 10;
     }
   </style>
-
-  <script>
-    // Fallback URLs matching your GAM variables (used only if opened outside GAM)
-    var defaultClickTag1 = "https://medical.lilly.com/uk/products/contact/lilly-representative-request";
-    var defaultClickTag2 = "https://dw250ad2fwsz1.cloudfront.net/962a1cfe-f9f4-4134-8c11-1f2de1c4386d/73e38c6c-ea49-4374-b33f-2ab8766fdafe/73e38c6c-ea49-4374-b33f-2ab8766fdafe_source__v.pdf";
-
-    var tracked1 = "";
-    var tracked2 = "";
-
-    // 1. Read clean GAM tracking URLs passed via iframe.name
-    try {
-      if (window.name) {
-        var parsed = JSON.parse(window.name);
-        if (parsed.clickTag1) tracked1 = parsed.clickTag1;
-        else if (parsed.clickTag) tracked1 = parsed.clickTag;
-        if (parsed.clickTag2) tracked2 = parsed.clickTag2;
-      }
-    } catch (e) {}
-
-    // 2. Fallback: Read from URL query parameters (?clickTag1=...&clickTag2=...)
-    if (!tracked1 || !tracked2) {
-      try {
-        var params = new URLSearchParams(window.location.search);
-        if (!tracked1) tracked1 = params.get("clickTag1") || params.get("clickTag") || "";
-        if (!tracked2) tracked2 = params.get("clickTag2") || "";
-      } catch (e) {}
-    }
-
-    var finalClickTag1 = tracked1 || defaultClickTag1;
-    var finalClickTag2 = tracked2 || defaultClickTag2;
-
-    // Handler for ClickTag1 (Main Button -> Lilly Representative Request)
-    function handleClickTag1(e) {
-      if (e) e.preventDefault();
-      try { window.parent.postMessage({ type: "gam_click", slot: 1 }, "*"); } catch (err) {}
-      window.open(finalClickTag1, "_blank", "noopener,noreferrer");
-      return false;
-    }
-
-    // Handler for ClickTag2 (Top-Right Hotspot -> CloudFront PDF)
-    function handleClickTag2(e) {
-      if (e) e.preventDefault();
-      try { window.parent.postMessage({ type: "gam_click", slot: 2 }, "*"); } catch (err) {}
-      window.open(finalClickTag2, "_blank", "noopener,noreferrer");
-      return false;
-    }
-  </script>
 </head>
 
 <body>
   <section>
-    <div>
+    <!-- Slide 1 -->
+    <div class="">
       <img src="1.png" alt="">
-
-      <!-- ClickTag1: Main CTA Button (Lilly Representative Request) -->
-      <a href="javascript:void(0)"
-         onclick="return handleClickTag1(event);"
+      <!-- Main CTA Button ("Request contact from a Lilly Representative") -> uses ClickTag1 -->
+      <a href="javascript:void(window.open(clickTag1))"
          class="hotspot"
-         aria-label="Contact Lilly Representative"
          style="left: 94px; top: 241px; width: 452px; height: 52px;"></a>
-
-      <!-- ClickTag2: Top-Right Link (PDF Document) -->
-      <a href="javascript:void(0)"
-         onclick="return handleClickTag2(event);"
+      <!-- Top-Right "click here" link -> uses ClickTag2 -->
+      <a href="javascript:void(window.open(clickTag))"
          class="hotspot"
-         aria-label="View Document"
          style="left: 564px; top: 84px; width: 57px; height: 18px;"></a>
     </div>
   </section>
